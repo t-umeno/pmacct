@@ -205,7 +205,22 @@ format_flow(struct FLOW *flow)
 
 	snprintf(stime, sizeof(ftime), "%s", format_time(flow->flow_start.tv_sec));
 	snprintf(ftime, sizeof(ftime), "%s", format_time(flow->flow_last.tv_sec));
-
+	
+#if defined HAVE_L2
+	snprintf(buf, sizeof(buf),  "seq:%llu [%s]:%u <> [%s]:%u proto:%u "
+	    "octets>:%llu packets>:%llu octets<:%llu packets<:%llu "
+	    "start:%s.%03u finish:%s.%03u tcp>:%02x tcp<:%02x "
+	    "flowlabel>:%08x flowlabel<:%08x vlan:%u ",
+	    flow->flow_seq,
+	    addr1, ntohs(flow->port[0]), addr2, ntohs(flow->port[1]),
+	    (int)flow->protocol, 
+	    flow->octets[0], flow->packets[0], 
+	    flow->octets[1], flow->packets[1], 
+	    stime, (flow->flow_start.tv_usec + 500) / 1000, 
+	    ftime, (flow->flow_last.tv_usec + 500) / 1000,
+	    flow->tcp_flags[0], flow->tcp_flags[1],
+	    flow->ip6_flowlabel[0], flow->ip6_flowlabel[1], flow->vlan);
+#else
 	snprintf(buf, sizeof(buf),  "seq:%llu [%s]:%u <> [%s]:%u proto:%u "
 	    "octets>:%llu packets>:%llu octets<:%llu packets<:%llu "
 	    "start:%s.%03u finish:%s.%03u tcp>:%02x tcp<:%02x "
@@ -219,7 +234,7 @@ format_flow(struct FLOW *flow)
 	    ftime, (flow->flow_last.tv_usec + 500) / 1000,
 	    flow->tcp_flags[0], flow->tcp_flags[1],
 	    flow->ip6_flowlabel[0], flow->ip6_flowlabel[1]);
-
+#endif
 	return (buf);
 }
 
