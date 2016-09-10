@@ -79,10 +79,16 @@ int telemetry_log_msg(telemetry_peer *peer, struct telemetry_data *t_data, void 
       bgp_peer_log_seq_increment(&tms->log_seq);
     }
 
-    compose_timestamp(tstamp_str, SRVBUFLEN, &tms->log_tstamp, TRUE, config.timestamps_since_epoch);
-    kv = json_pack("{ss}", "timestamp", tstamp_str);
-    json_object_update_missing(obj, kv);
-    json_decref(kv);
+    if (etype == BGP_LOGDUMP_ET_LOG) {
+      kv = json_pack("{ss}", "timestamp", tms->log_tstamp_str);
+      json_object_update_missing(obj, kv);
+      json_decref(kv);
+    }
+    else if (etype == BGP_LOGDUMP_ET_DUMP) {
+      kv = json_pack("{ss}", "timestamp", tms->dump.tstamp_str);
+      json_object_update_missing(obj, kv);
+      json_decref(kv);
+    }
 
     kv = json_pack("{ss}", "telemetry_node", peer->addr_str);
     json_object_update_missing(obj, kv);
@@ -300,7 +306,7 @@ void telemetry_handle_dump_event(struct telemetry_data *t_data)
         if (config.telemetry_dump_amqp_routing_key) telemetry_peer_log_dynname(current_filename, SRVBUFLEN, config.telemetry_dump_amqp_routing_key, peer);
         if (config.telemetry_dump_kafka_topic) telemetry_peer_log_dynname(current_filename, SRVBUFLEN, config.telemetry_dump_kafka_topic, peer);
 
-        strftime_same(current_filename, SRVBUFLEN, tmpbuf, &tms->log_tstamp.tv_sec);
+        strftime_same(current_filename, SRVBUFLEN, tmpbuf, &tms->dump.tstamp.tv_sec);
 
         /*
           we close last_filename and open current_filename in case they differ;
