@@ -219,7 +219,7 @@ format_flow(struct FLOW *flow)
 	    stime, (flow->flow_start.tv_usec + 500) / 1000, 
 	    ftime, (flow->flow_last.tv_usec + 500) / 1000,
 	    flow->tcp_flags[0], flow->tcp_flags[1],
-	    flow->ip6_flowlabel[0], flow->ip6_flowlabel[1], flow->vlan);
+	    flow->ip6_flowlabel[0], flow->ip6_flowlabel[1], ntohs(flow->vlan));
 #else
 	snprintf(buf, sizeof(buf),  "seq:%llu [%s]:%u <> [%s]:%u proto:%u "
 	    "octets>:%llu packets>:%llu octets<:%llu packets<:%llu "
